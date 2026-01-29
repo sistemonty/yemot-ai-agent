@@ -1,9 +1,8 @@
 [build]
 builder = "nixpacks"
-buildCommand = "curl -fsSL https://bun.sh/install | bash && ~/.bun/bin/bun install"
+nixpacksConfigPath = "nixpacks.toml"
 
 [deploy]
-startCommand = "~/.bun/bin/bun run src/server.ts"
 healthcheckPath = "/health"
 healthcheckTimeout = 100
 restartPolicyType = "on_failure"
