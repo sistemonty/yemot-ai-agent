@@ -5,8 +5,12 @@
  */
 
 import { Hono } from "hono";
+import { Resend } from "resend";
 import { generateResponse } from "./claude";
 import { config, replacePlaceholders, printConfig } from "./config";
+
+// Resend client for emails
+const resend = process.env.RESEND_API_KEY ? new Resend(process.env.RESEND_API_KEY) : null;
 
 const app = new Hono();
 
@@ -47,7 +51,7 @@ function createResponse(text: string, waitForRecording: boolean = true): string 
 }
 
 /**
- * שולח סיכום במייל (TODO: להוסיף שליחה אמיתית)
+ * שולח סיכום במייל
  */
 async function sendSummaryEmail(callId: string, phone: string, history: Array<{ role: string; content: string }>) {
   const email = config.notificationEmail;
@@ -60,11 +64,48 @@ async function sendSummaryEmail(callId: string, phone: string, history: Array<{ 
     `${msg.role === "user" ? "👤 מתקשר" : "🤖 מירי"}: ${msg.content}`
   ).join("\n");
 
+  const htmlSummary = history.map(msg =>
+    `<p><strong>${msg.role === "user" ? "👤 מתקשר" : "🤖 מירי"}:</strong> ${msg.content}</p>`
+  ).join("");
+
   console.log(`📧 סיכום לשליחה למייל ${email}:`);
   console.log(`📞 מספר: ${phone}`);
   console.log(`🆔 CallID: ${callId}`);
   console.log(`💬 שיחה:\n${summary}`);
-  console.log("📧 [כרגע רק לוג - להוסיף שליחה אמיתית]");
+
+  if (!resend) {
+    console.log("⚠️ לא הוגדר RESEND_API_KEY - לא נשלח מייל");
+    return;
+  }
+
+  try {
+    const { data, error } = await resend.emails.send({
+      from: "עוזר קולי <onboarding@resend.dev>",
+      to: email,
+      subject: `📞 שיחה חדשה מ-${phone} - ${config.organization.name}`,
+      html: `
+        <div dir="rtl" style="font-family: Arial, sans-serif; max-width: 600px;">
+          <h2>📞 סיכום שיחה</h2>
+          <p><strong>מספר מתקשר:</strong> ${phone}</p>
+          <p><strong>מזהה שיחה:</strong> ${callId}</p>
+          <p><strong>זמן:</strong> ${new Date().toLocaleString("he-IL")}</p>
+          <hr>
+          <h3>💬 השיחה:</h3>
+          ${htmlSummary}
+          <hr>
+          <p style="color: #666; font-size: 12px;">נשלח אוטומטית מ-${config.organization.name}</p>
+        </div>
+      `
+    });
+
+    if (error) {
+      console.error("❌ שגיאה בשליחת מייל:", error);
+    } else {
+      console.log("✅ מייל נשלח בהצלחה:", data?.id);
+    }
+  } catch (err) {
+    console.error("❌ שגיאה בשליחת מייל:", err);
+  }
 }
 
 // הכנת הפרומפט עם placeholders
