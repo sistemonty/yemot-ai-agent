@@ -3,13 +3,17 @@
  */
 
 import Groq from "groq-sdk";
-import { readFileSync } from "fs";
+import { readFileSync, existsSync } from "fs";
 import { resolve } from "path";
 
-// טעינת .env ידנית
+// טעינת .env ידנית (רק אם קיים)
 function loadEnv() {
+  const envPath = resolve(process.cwd(), ".env");
+  if (!existsSync(envPath)) {
+    console.log("ℹ️ .env לא קיים - משתמש במשתני סביבה");
+    return;
+  }
   try {
-    const envPath = resolve(process.cwd(), ".env");
     const envContent = readFileSync(envPath, "utf-8");
     for (const line of envContent.split("\n")) {
       const trimmed = line.trim();
@@ -21,7 +25,7 @@ function loadEnv() {
       }
     }
   } catch (e) {
-    console.error("❌ לא ניתן לטעון .env:", e);
+    console.log("ℹ️ לא ניתן לטעון .env - משתמש במשתני סביבה");
   }
 }
 
