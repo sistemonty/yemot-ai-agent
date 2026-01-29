@@ -220,10 +220,13 @@ app.get("/", (c) => {
 
 // הפעלת השרת
 printConfig();
-console.log(`🚀 שרת פעיל: http://localhost:${config.port}`);
+console.log(`🚀 שרת פעיל על פורט ${config.port}`);
 console.log(`🔗 Webhook: https://YOUR_DOMAIN/yemot\n`);
 
-export default {
+const server = Bun.serve({
   port: config.port,
+  hostname: "0.0.0.0",
   fetch: app.fetch
-};
+});
+
+console.log(`✅ Server running at http://${server.hostname}:${server.port}`);
