@@ -1,0 +1,17 @@
+{
+  "name": "yemot-ai-agent",
+  "version": "1.0.0",
+  "description": "עוזר קולי AI עם ימות המשיח",
+  "type": "module",
+  "scripts": {
+    "dev": "bun run --env-file=.env --watch src/server.ts",
+    "start": "bun run --env-file=.env src/server.ts",
+    "tunnel": "npx localtunnel --port 3000"
+  },
+  "dependencies": {
+    "@anthropic-ai/sdk": "^0.24.0",
+    "groq-sdk": "^0.37.0",
+    "hono": "^4.4.0",
+    "openai": "^4.50.0"
+  }
+}

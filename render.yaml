@@ -1,0 +1,23 @@
+services:
+  - type: web
+    name: yemot-ai-agent
+    runtime: node
+    buildCommand: curl -fsSL https://bun.sh/install | bash && ~/.bun/bin/bun install
+    startCommand: ~/.bun/bin/bun run src/server.ts
+    envVars:
+      - key: PORT
+        value: 10000
+      - key: AI_PROVIDER
+        value: groq
+      - key: GROQ_API_KEY
+        sync: false
+      - key: YEMOT_PHONE
+        sync: false
+      - key: YEMOT_API_KEY
+        sync: false
+      - key: ORG_NAME
+        sync: false
+      - key: VERIFICATION_PHONE
+        sync: false
+      - key: NOTIFICATION_EMAIL
+        sync: false
