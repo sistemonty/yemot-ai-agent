@@ -25,7 +25,9 @@ const completedCalls: Set<string> = new Set();
  */
 function cleanTextForTts(text: string): string {
   return text
+    .replace(/ת"ז/g, "תעודת זהות")  // ת"ז -> תעודת זהות
     .replace(/[.!?;:,]/g, " ")  // כל סימני פיסוק הופכים לרווח
+    .replace(/["'״׳`]/g, "")    // הסרת גרשיים ומירכאות
     .replace(/[-–—]/g, " ")     // מקפים הופכים לרווח
     .replace(/\s+/g, " ")       // רווחים כפולים הופכים לאחד
     .trim();
